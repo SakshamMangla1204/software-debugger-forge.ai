@@ -71,5 +71,63 @@ def initialize_models():
                         "No LLM models could be initialized"
                     )
 
-                return models    
+                return models
 
+
+_models = None
+
+
+def get_models():
+    global _models
+
+    if _models is None:
+        _models = initialize_models()
+
+    return _models
+
+
+def invoke_with_fallback(prompt: str) -> str:
+    if not isinstance(prompt, str) or not prompt.strip():
+        raise ValueError("Prompt must be a non-empty string")
+
+    models = get_models()
+    failures = []
+
+    for provider_name, model in models:
+        try:
+            logger.info("Sending the request to %s", provider_name)
+
+            response = model.invoke(prompt)
+            content = response.content
+
+            if isinstance(content, str) and content.strip():
+                return content
+
+            failures.append(f"{provider_name}: empty response")
+
+        except Exception as error:
+            failures.append(
+                f"{provider_name}:{type(error).__name__}"
+            )
+            logger.warning(
+                "%s request failed: %s",
+                provider_name,
+                type(error).__name__,
+            )
+
+    raise RuntimeError(
+        "All AI providers failed. " + "; ".join(failures)
+    )
+
+
+# Run a simple test when this file is executed directly
+if __name__ == "__main__":
+    try:
+        answer = invoke_with_fallback(
+            "Explain the purpose of Forge in one sentence."
+        )
+        print("\nAI response:")
+        print(answer)
+
+    except Exception as error:
+        print(f"Forge could not obtain a response: {error}")
