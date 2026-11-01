@@ -4,7 +4,7 @@ import logging
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
-from langchain_mistralai import ChatMistral
+from langchain_mistralai import ChatMistralAI
 
 from config import (
     MODEL_NAME,
@@ -54,7 +54,7 @@ def initialize_models():
 
             if os.getenv("MISTRAL_API_KEY"):
                 try:
-                    mistral = ChatMistral(
+                    mistral = ChatMistralAI(
                         model=MODEL_NAME,
                         temperature=TEMPERATURE,
                     )
