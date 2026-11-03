@@ -6,4 +6,8 @@ class State(TypedDict):
     discovered_file:str
     diagnosis:str
     test_result:str
+    repair_plan:str
+    patch:str
+    final_report:str
+    
 
